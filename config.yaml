@@ -1,0 +1,129 @@
+# ScrapAI Configuration File
+
+# Dataset configuration
+dataset:
+  name: "wastenet"
+  data_dir: "data/processed"
+  splits:
+    train: 0.7
+    val: 0.2
+    test: 0.1
+  categories:
+    - plastic
+    - metal
+    - cardboard
+    - glass
+
+# Model configuration
+model:
+  architecture: "mask_rcnn"
+  backbone: "resnet50"
+  fpn: true
+  pretrained: true
+  num_classes: 4
+  
+  # ROI head settings
+  roi_heads:
+    batch_size: 256
+    score_threshold: 0.5
+    nms_threshold: 0.5
+    detections_per_image: 100
+
+# Training configuration
+training:
+  batch_size: 4
+  num_epochs: 50
+  base_lr: 0.001
+  lr_schedule: "step"
+  lr_steps: [35000, 45000]
+  lr_gamma: 0.1
+  warmup_iters: 1000
+  warmup_factor: 0.001
+  
+  optimizer: "sgd"
+  momentum: 0.9
+  weight_decay: 0.0001
+  
+  checkpoint_period: 1000
+  eval_period: 1000
+  
+  # Augmentation
+  augmentation:
+    horizontal_flip: 0.5
+    vertical_flip: 0.3
+    rotation: 45
+    brightness: 0.3
+    contrast: 0.3
+    noise: 0.4
+  
+  # Mixed precision training
+  amp_enabled: true
+
+# Input configuration
+input:
+  min_size_train: [640, 672, 704, 736, 768, 800]
+  max_size_train: 1333
+  min_size_test: 800
+  max_size_test: 1333
+  format: "BGR"
+
+# Evaluation configuration
+evaluation:
+  metrics:
+    - "mAP"
+    - "mAP50"
+    - "mAP75"
+    - "confusion_matrix"
+  save_predictions: true
+  visualize_failures: true
+
+# Export configuration
+export:
+  formats:
+    - "torchscript"
+    - "onnx"
+  onnx_opset: 11
+  optimize: true
+
+# Deployment configuration
+deployment:
+  platform: "server"  # server, jetson, mobile, microcontroller
+  quantization: "dynamic"  # none, dynamic, static, qat
+  optimization_level: 2
+  
+  # Jetson specific
+  jetson:
+    use_tensorrt: true
+    fp16_mode: true
+    max_workspace_size: 1073741824  # 1GB
+  
+  # Server specific
+  server:
+    max_batch_size: 8
+    num_workers: 4
+
+# API configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  workers: 1
+  log_level: "info"
+  
+  # CORS
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+
+# Paths
+paths:
+  data_dir: "data"
+  output_dir: "output"
+  checkpoint_dir: "models/checkpoints"
+  export_dir: "models/exported"
+  log_dir: "logs"
